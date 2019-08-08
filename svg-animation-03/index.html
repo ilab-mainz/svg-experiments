@@ -89,6 +89,7 @@
 
     <div class="experiment--canvas">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+        <title>Scribble</title>
         <rect width="800" height="400" fill="white" />
         <g id="scribble"></g>
         <g id="cursor" transform="translate(-100 -100)">
@@ -98,14 +99,15 @@
     </div>
 
     <div class="experiment--gui">
-        <div>
-          <label><input name="duration" type="range" min="0.1" , step="0.1" max="10"> Duration</label>
-          <label> <input name="pressure" type="range" min="1" max="100" value="25"> Pressure</label>
-          <label><input name="angle" type="range" min="-90" max="90"> Angle</label>
-        </div>
-        <div>
-          <input name="reset" type="button" value="Clear">
-        </div>
+      <div>
+        <label><input name="duration" type="range" min="0.1" , step="0.1" max="10"> Duration</label>
+        <label> <input name="pressure" type="range" min="1" max="100" value="25"> Pressure</label>
+        <label><input name="angle" type="range" min="-90" max="90"> Angle</label>
+      </div>
+      <div>
+        <input name="reset" type="button" value="Clear">
+        <input name="save" type="button" value="Save SVG">
+      </div>
     </div>
 
   </div>
@@ -245,6 +247,9 @@
     const resetButton = document.querySelector('.experiment--gui input[name=reset]');
     resetButton.addEventListener('click', resetScribble);
 
+    const saveButton = document.querySelector('.experiment--gui input[name=save]');
+    saveButton.addEventListener('click', saveSVG);
+
     initSlider('pressure', pressure, setPressure);
     initSlider('duration', duration, setDuration);
     initSlider('angle', angle, setAngle);
@@ -273,6 +278,29 @@
 
     function resetScribble() {
       scribble.innerHTML = '';
+    }
+
+    function saveSVG() {
+
+      // create a data blob from the SVG
+      const serializer = new XMLSerializer();
+      const blob = new Blob([serializer.serializeToString(svg)], { 'type': "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+
+      // create a temporaty download link and pass the click event to it
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = createFilename('Scribble', 'svg');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // create a unique filename based on the current time and date
+      function createFilename(base, ending) {
+        const dateStamp = new Date().toDateString().split(' ').slice(1, 4).join('-');
+        const timeStamp = new Date().toTimeString().split(' ')[0].split(':').join('-');
+        return `${base}-${dateStamp}-${timeStamp}.${ending}`;
+      }
     }
 
     function setPressure(evt) {
