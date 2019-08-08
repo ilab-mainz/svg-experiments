@@ -102,7 +102,7 @@
       <div>
         <label><input name="duration" type="range" min="0.1" , step="0.1" max="10"> Duration</label>
         <label> <input name="pressure" type="range" min="1" max="100" value="25"> Pressure</label>
-        <label><input name="angle" type="range" min="-90" max="90"> Angle</label>
+        <label><input name="twist" type="range" min="-90" max="90"> Twist</label>
       </div>
       <div>
         <input name="reset" type="button" value="Clear">
@@ -116,7 +116,7 @@
   <h3>Usage</h3>
   <ul>
     <li>Use the mouse to draw </li>
-    <li>Adjust pressure and angle using the sliders</li>
+    <li>Adjust pressure and twist using the sliders</li>
     <li><em>Save SVG</em> to get the raw SVG (no animation)</li>
     <li><em>Export Data</em> to get the stroke data as JSON file </li>
   </ul>
@@ -139,7 +139,7 @@
 
   <script>
     let pressure = 25;
-    let angle = 45;
+    let twist = 45;
     let duration = 3;
 
     let p1 = [0, 0];
@@ -171,13 +171,13 @@
     function createSVG(strokes) {
 
       // attach stroke parts
-      strokes.forEach(({ x, y, pressure, angle }, i) => {
+      strokes.forEach(({ x, y, pressure, twist }, i) => {
 
         // create part
         const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
 
         // create SVG path for the part
-        calculateStroke(x, y, angle, pressure);
+        calculateStroke(x, y, twist, pressure);
         const points = [pp1, pp2, p2, p1];
         const pstr = points.map(p => p[0] + ',' + p[1]).join(' ');
         poly.setAttribute("points", pstr);
@@ -189,10 +189,10 @@
     };
 
     // calculate points for stroke outline
-    function calculateStroke(x, y, angle, pressure) {
+    function calculateStroke(x, y, twist, pressure) {
 
       // stroke direction
-      const phi = Math.PI * angle / 180.0;
+      const phi = Math.PI * twist / 180.0;
       const dir = [0.5 * pressure * Math.cos(phi), 0.5 * pressure * Math.sin(phi)];
 
       // previous outer points
@@ -214,7 +214,7 @@
 
       // update points
       let { x, y } = getMousePosition(evt);
-      calculateStroke(x, y, angle, pressure);
+      calculateStroke(x, y, twist, pressure);
 
       // update data
       beginStroke();
@@ -233,7 +233,7 @@
       if (recording) {
 
         // create new sampling point
-        const newPoint = { x, y, pressure, angle };
+        const newPoint = { x, y, pressure, twist };
 
         // extend stroke data
         addStrokePoint(newPoint);
@@ -295,7 +295,7 @@
 
     initSlider('pressure', pressure, setPressure);
     initSlider('duration', duration, setDuration);
-    initSlider('angle', angle, setAngle);
+    initSlider('twist', twist, setTwist);
 
     // init slider with a value, adding an output field to the slider
     function initSlider(name, value, inputFn) {
@@ -362,8 +362,8 @@
       updateCursor();
     }
 
-    function setAngle(evt) {
-      angle = parseFloat(evt.target.value);
+    function setTwist(evt) {
+      twist = parseFloat(evt.target.value);
       updateCursor();
     }
 
@@ -375,7 +375,7 @@
     // update rotation and size of the cursor
     function updateCursor() {
       const transforms = cursor.firstElementChild.transform.baseVal
-      transforms.getItem(0).setRotate(angle, 0, 0);
+      transforms.getItem(0).setRotate(twist, 0, 0);
       transforms.getItem(1).setScale(pressure, 2);
     }
 
