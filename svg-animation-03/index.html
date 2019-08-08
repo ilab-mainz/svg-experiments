@@ -158,8 +158,11 @@
     // stroke data
 
     let currentStroke = undefined;
+    let strokes = [];
 
-    const strokes = [];
+    function resetStrokes() {
+      strokes = [];
+    }
 
     function beginStroke() {
       currentStroke = [];
@@ -324,7 +327,10 @@
     }
 
     function resetScribble() {
+      // reset svg
       scribble.innerHTML = '';
+      // reset data
+      resetStrokes();
     }
 
     function saveSVG() {
