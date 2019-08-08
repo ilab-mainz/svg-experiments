@@ -107,16 +107,26 @@
       <div>
         <input name="reset" type="button" value="Clear">
         <input name="save" type="button" value="Save SVG">
+        <input name="export" type="button" value="Export Data">
       </div>
     </div>
 
   </div>
+
+  <h3>Usage</h3>
+  <ul>
+    <li>Use the mouse to draw </li>
+    <li>Adjust pressure and angle using the sliders</li>
+    <li><em>Save SVG</em> to get the raw SVG (no animation)</li>
+    <li><em>Export Data</em> to get the stroke data as JSON file </li>
+  </ul>
 
   <h3>Note</h3>
   <ul>
     <li>We are adding pathelements (quads) in real time</li>
     <li>The CSS is applied to each quad as soon as it is added to the SVG :-)</li>
   </ul>
+
 
   <h3>Possible Improvements</h3>
   <ul>
@@ -139,6 +149,24 @@
     const svg = document.querySelector("svg");
     const scribble = svg.querySelector("#scribble");
     const cursor = svg.querySelector("#cursor");
+
+    ////////////////////////////////////////////////////////////////////////////
+    // stroke data
+
+    let currentStroke = undefined;
+
+    const strokes = [];
+
+    function beginStroke() {
+      currentStroke = [];
+      strokes.push(currentStroke);
+    }
+
+    function addStrokePoint(point) {
+      currentStroke.push(point);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
 
     function createSVG(strokes) {
 
@@ -183,8 +211,14 @@
     // Mouse interaction
 
     svg.addEventListener('mousedown', (evt) => {
+
+      // update points
       let { x, y } = getMousePosition(evt);
       calculateStroke(x, y, angle, pressure);
+
+      // update data
+      beginStroke();
+
       recording = true;
     });
 
@@ -196,11 +230,17 @@
 
       let { x, y } = getMousePosition(evt);
 
-      // Add stroke
       if (recording) {
-        const strokes = [];
-        strokes.push({ x, y, pressure, angle });
-        createSVG(strokes);
+
+        // create new sampling point
+        const newPoint = { x, y, pressure, angle };
+
+        // extend stroke data
+        addStrokePoint(newPoint);
+
+        // add quad to the SVG
+        createSVG([newPoint]);
+
       }
 
       // Move SVG cursor
@@ -250,6 +290,9 @@
     const saveButton = document.querySelector('.experiment--gui input[name=save]');
     saveButton.addEventListener('click', saveSVG);
 
+    const exportButton = document.querySelector('.experiment--gui input[name=export]');
+    exportButton.addEventListener('click', exportJSON);
+
     initSlider('pressure', pressure, setPressure);
     initSlider('duration', duration, setDuration);
     initSlider('angle', angle, setAngle);
@@ -281,16 +324,26 @@
     }
 
     function saveSVG() {
-
-      // create a data blob from the SVG
       const serializer = new XMLSerializer();
-      const blob = new Blob([serializer.serializeToString(svg)], { 'type': "image/svg+xml" });
+      const xml = serializer.serializeToString(svg);
+      const blob = new Blob([xml], {type: "image/svg+xml" });
+      saveBlob(blob, 'Scribble', 'svg');
+    }
+
+    function exportJSON() {
+      const json = JSON.stringify(strokes, null, "\t");
+      const blob = new Blob([json], {type: "application/json"})
+      saveBlob(blob, 'Scribble', 'json');
+    }
+
+    function saveBlob(blob, base, ending) {
+
       const url = URL.createObjectURL(blob);
 
       // create a temporaty download link and pass the click event to it
       const link = document.createElement("a");
       link.href = url;
-      link.download = createFilename('Scribble', 'svg');
+      link.download = createFilename(base, ending);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -301,6 +354,7 @@
         const timeStamp = new Date().toTimeString().split(' ')[0].split(':').join('-');
         return `${base}-${dateStamp}-${timeStamp}.${ending}`;
       }
+
     }
 
     function setPressure(evt) {
