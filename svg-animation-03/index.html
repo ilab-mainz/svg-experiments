@@ -326,13 +326,13 @@
     function saveSVG() {
       const serializer = new XMLSerializer();
       const xml = serializer.serializeToString(svg);
-      const blob = new Blob([xml], {type: "image/svg+xml" });
+      const blob = new Blob([xml], { type: "image/svg+xml" });
       saveBlob(blob, 'Scribble', 'svg');
     }
 
     function exportJSON() {
       const json = JSON.stringify(strokes, null, "\t");
-      const blob = new Blob([json], {type: "application/json"})
+      const blob = new Blob([json], { type: "application/json" })
       saveBlob(blob, 'Scribble', 'json');
     }
 
@@ -358,17 +358,17 @@
     }
 
     function setPressure(evt) {
-      pressure = evt.target.value;
+      pressure = parseFloat(evt.target.value);
       updateCursor();
     }
 
     function setAngle(evt) {
-      angle = evt.target.value;
+      angle = parseFloat(evt.target.value);
       updateCursor();
     }
 
     function setDuration(evt) {
-      duration = evt.target.value;
+      duration = parseFloat(evt.target.value);
       updateAnimation();
     }
 
