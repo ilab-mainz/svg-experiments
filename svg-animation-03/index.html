@@ -100,9 +100,9 @@
     <div class="experiment--gui">
       <form>
         <div>
-          <label><input name="duration" type="range" min="0.1", step="0.1" max="10"> Duration</label>
+          <label><input name="duration" type="range" min="0.1" , step="0.1" max="10"> Duration</label>
           <label> <input name="pressure" type="range" min="1" max="100" value="25"> Pressure</label>
-          <label><input name="angle" type="range" min="-90" max="90" > Angle</label>
+          <label><input name="angle" type="range" min="-90" max="90"> Angle</label>
         </div>
         <div>
           <input name="reset" type="button" value="Clear">
@@ -128,7 +128,6 @@
   </ul>
 
   <script>
-
     let pressure = 25;
     let angle = 45;
     let duration = 3;
@@ -180,8 +179,8 @@
 
     let recording = false;
 
-  ////////////////////////////////////////////////////////////////////////////
-  // Mouse interaction
+    ////////////////////////////////////////////////////////////////////////////
+    // Mouse interaction
 
     svg.addEventListener('mousedown', (evt) => {
       let { x, y } = getMousePosition(evt);
@@ -214,7 +213,7 @@
     });
 
     svg.addEventListener('mouseenter', (evt) => {
-        cursor.style.visibility = 'visible';
+      cursor.style.visibility = 'visible';
     });
 
     function getMousePosition(evt) {
@@ -258,13 +257,15 @@
         inputFn(evt);
         updateOutput(evt.target);
       }
+
       function createOutput(e) {
         e.parentElement.insertAdjacentHTML('beforeend', ': <output></output>');
         updateOutput(e);
       }
+
       function updateOutput(e) {
         const output = e.parentElement.querySelector('output');
-        if(output) output.value = e.value;
+        if (output) output.value = e.value;
       }
       const slider = document.querySelector(`.experiment--gui input[name=${name}]`);
       slider.addEventListener('input', callback);
@@ -294,18 +295,17 @@
     // update rotation and size of the cursor
     function updateCursor() {
       const transforms = cursor.firstElementChild.transform.baseVal
-      transforms.getItem(0).setRotate(angle , 0, 0);
+      transforms.getItem(0).setRotate(angle, 0, 0);
       transforms.getItem(1).setScale(pressure, 2);
     }
 
     // update duration of the animation
     function updateAnimation() {
       const rule = Array.from(document.styleSheets[0].cssRules).find(
-         r => r.selectorText == ".experiment--canvas svg polygon"
+        r => r.selectorText == ".experiment--canvas svg polygon"
       )
       rule.style.animationDuration = `${duration}s`;
     }
-
   </script>
 
 </body>
