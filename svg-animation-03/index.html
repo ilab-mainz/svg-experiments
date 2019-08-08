@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>SVG-Stroke Animation via CSS</title>
+  <style>
+    @import 'gui.css';
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 50px;
+      background-color: #ddd;
+      font-family: sans-serif;
+    }
+
+    .experiment {
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid #999;
+      position: relative;
+    }
+
+    .experiment--canvas svg {
+      background-color: #ddd;
+      cursor: none;
+    }
+
+    .experiment--canvas {
+      flex: auto;
+    }
+
+    .experiment--canvas svg {
+      height: 100%;
+      width: 100%;
+    }
+
+    .experiment--canvas svg polygon {
+      opacity: 0;
+      stroke-width: 0.25px;
+      stroke: black;
+      animation-fill-mode: forwards;
+      animation-duration: 3s;
+      animation-name: stroke_anim_1;
+      animation-iteration-count: infinite;
+    }
+
+    .experiment--canvas svg * {
+      pointer-events: none;
+    }
+
+    @keyframes stroke_anim_1 {
+      10% {
+        opacity: 1;
+        fill: inherit;
+      }
+
+      40% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes stroke_anim_2 {
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <h1>SVG Animation via CSS</h1>
+    <p>
+      Use the mouse to draw a stroke ...
+    </p>
+  </div>
+
+  <div class="experiment">
+
+    <div class="experiment--canvas">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+        <rect width="800" height="400" fill="white" />
+        <g id="scribble"></g>
+        <g id="cursor" transform="translate(-100 -100)">
+          <rect transform="rotate(45) scale(25, 2) translate(-.5 -.5)" width="1" height="1" fill="red" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="experiment--gui">
+      <form>
+        <div>
+          <label><input name="duration" type="range" min="0.1", step="0.1" max="10"> Duration</label>
+          <label> <input name="pressure" type="range" min="1" max="100" value="25"> Pressure</label>
+          <label><input name="angle" type="range" min="-90" max="90" > Angle</label>
+        </div>
+        <div>
+          <input name="reset" type="button" value="Clear">
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <h3>Note</h3>
+  <ul>
+    <li>We are adding pathelements (quads) in real time</li>
+    <li>The CSS is applied to each quad as soon as it is added to the SVG :-)</li>
+  </ul>
+
+  <h3>Possible Improvements</h3>
+  <ul>
+    <li>Add timestamps to each sample, so we can recreate and export the path</li>
+    <li>Use timestamp to set the animation delay</li>
+    <li>Create rounded path (bezier delimited quads instead of polygons)</li>
+    <li>Use a SVG library such as Paper.js ...</li>
+    <lI>Use a GUI library ...</li>
+  </ul>
+
+  <script>
+
+    let pressure = 25;
+    let angle = 45;
+    let duration = 3;
+
+    let p1 = [0, 0];
+    let p2 = [0, 0];
+    let pp1, pp2;
+
+    const svg = document.querySelector("svg");
+    const scribble = svg.querySelector("#scribble");
+    const cursor = svg.querySelector("#cursor");
+
+    function createSVG(strokes) {
+
+      // attach stroke parts
+      strokes.forEach(({ x, y, pressure, angle }, i) => {
+
+        // create part
+        const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+        // create SVG path for the part
+        calculateStroke(x, y, angle, pressure);
+        const points = [pp1, pp2, p2, p1];
+        const pstr = points.map(p => p[0] + ',' + p[1]).join(' ');
+        poly.setAttribute("points", pstr);
+
+        // animation delay will magically depend on the current point in time
+        scribble.appendChild(poly);
+      });
+
+    };
+
+    // calculate points for stroke outline
+    function calculateStroke(x, y, angle, pressure) {
+
+      // stroke direction
+      const phi = Math.PI * angle / 180.0;
+      const dir = [0.5 * pressure * Math.cos(phi), 0.5 * pressure * Math.sin(phi)];
+
+      // previous outer points
+      pp1 = p1;
+      pp2 = p2;
+
+      // new outer points
+      p1 = [x - dir[0], y - dir[1]];
+      p2 = [x + dir[0], y + dir[1]];
+
+    }
+
+    let recording = false;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Mouse interaction
+
+    svg.addEventListener('mousedown', (evt) => {
+      let { x, y } = getMousePosition(evt);
+      calculateStroke(x, y, angle, pressure);
+      recording = true;
+    });
+
+    svg.addEventListener('mouseup', () => {
+      recording = false;
+    });
+
+    svg.addEventListener('mousemove', (evt) => {
+
+      let { x, y } = getMousePosition(evt);
+
+      // Add stroke
+      if (recording) {
+        const strokes = [];
+        strokes.push({ x, y, pressure, angle });
+        createSVG(strokes);
+      }
+
+      // Move SVG cursor
+      cursor.transform.baseVal.getItem(0).setTranslate(x, y);
+
+    });
+
+    svg.addEventListener('mouseleave', (evt) => {
+      cursor.style.visibility = 'hidden';
+    });
+
+    svg.addEventListener('mouseenter', (evt) => {
+        cursor.style.visibility = 'visible';
+    });
+
+    function getMousePosition(evt) {
+      const target = evt.target;
+      const rect = target.getBoundingClientRect();
+      if (target.tagName === 'svg') {
+        return dom2svg(target, evt.clientX, evt.clientY);
+      } else {
+        console.log(target);
+        return {
+          x: evt.clientX,
+          y: evt.clientY
+        }
+      }
+    }
+
+    function dom2svg(svg, x, y) {
+      const pt = svg.createSVGPoint();
+      pt.x = x;
+      pt.y = y;
+      const cp = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return {
+        x: Math.floor(cp.x),
+        y: Math.floor(cp.y)
+      };
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // GUI interaction
+
+    const resetButton = document.querySelector('.experiment--gui input[name=reset]');
+    resetButton.addEventListener('click', resetScribble);
+
+    initSlider('pressure', pressure, setPressure);
+    initSlider('duration', duration, setDuration);
+    initSlider('angle', angle, setAngle);
+
+    // init slider with a value, adding an output field to the slider
+    function initSlider(name, value, inputFn) {
+      function callback(evt) {
+        inputFn(evt);
+        updateOutput(evt.target);
+      }
+      function createOutput(e) {
+        e.parentElement.insertAdjacentHTML('beforeend', ': <output></output>');
+        updateOutput(e);
+      }
+      function updateOutput(e) {
+        const output = e.parentElement.querySelector('output');
+        if(output) output.value = e.value;
+      }
+      const slider = document.querySelector(`.experiment--gui input[name=${name}]`);
+      slider.addEventListener('input', callback);
+      slider.value = value;
+      createOutput(slider);
+    }
+
+    function resetScribble() {
+      scribble.innerHTML = '';
+    }
+
+    function setPressure(evt) {
+      pressure = evt.target.value;
+      updateCursor();
+    }
+
+    function setAngle(evt) {
+      angle = evt.target.value;
+      updateCursor();
+    }
+
+    function setDuration(evt) {
+      duration = evt.target.value;
+      updateAnimation();
+    }
+
+    // update rotation and size of the cursor
+    function updateCursor() {
+      const transforms = cursor.firstElementChild.transform.baseVal
+      transforms.getItem(0).setRotate(angle , 0, 0);
+      transforms.getItem(1).setScale(pressure, 2);
+    }
+
+    // update duration of the animation
+    function updateAnimation() {
+      const rule = Array.from(document.styleSheets[0].cssRules).find(
+         r => r.selectorText == ".experiment--canvas svg polygon"
+      )
+      rule.style.animationDuration = `${duration}s`;
+    }
+
+  </script>
+
+</body>
+
+</html>

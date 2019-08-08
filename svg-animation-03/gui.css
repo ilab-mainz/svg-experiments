@@ -1,0 +1,62 @@
+.experiment--gui {
+  flex: none;
+  width: 250px;
+  background-color: #eee;
+  border-left: 1px solid #999;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.experiment--gui div {
+  padding: 10px;
+}
+
+.experiment--gui label {
+  display: block;
+  color: #999;
+  margin-bottom: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid;
+  border-color: rgba(100, 100, 100, 0.2);
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.experiment--gui input[type=button]:hover,
+.experiment--gui label:hover {
+  color: #000;
+  border-color: rgba(100, 100, 100, 0.9);
+  background-color: #fff;
+}
+
+.experiment--gui input {
+  width: 200px;
+  outline: none;
+}
+
+.experiment--gui input[type=button] {
+  padding: 15px;
+  width: 100%;
+  border-style: solid;
+  border-radius: 10px;
+  border-width: 1px;
+  border-color: #666;
+  margin: 0px 2px 2px 0px;
+  box-shadow: 3px 3px 1px #999;
+  font-size: inherit;
+  background-color: #eee;
+}
+
+.experiment--gui label,
+.experiment--gui input[type=button] {
+  transition: color 500ms ease-out, border-color 500ms ease-out, background-color 500ms ease-out;
+}
+
+.experiment--gui input[type=button]:active {
+  margin: 2px 0px 0px 2px;
+  box-shadow: 1px 1px 1px #999;
+}

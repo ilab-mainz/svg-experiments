@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>SVG-Stroke Animation via CSS</title>
+  <style>
+  
+    body {
+      font-family: sans-serif;
+    }
+
+    svg {
+      background-color: #ddd;
+    }
+
+    svg>g>* {
+      opacity: 0;
+      animation-fill-mode: none;
+      animation-duration: 5s;
+      animation-name: myanim;
+      animation-iteration-count: infinite;
+      stroke-width: 0.25px;
+      fill: black;
+      stroke: black;
+    }
+
+    #step1 {
+      animation-delay: 0.0s;
+    }
+
+    #step2 {
+      animation-delay: 0.1s;
+    }
+
+    #step3 {
+      animation-delay: 0.2s;
+    }
+
+    @keyframes myanim {
+      0% {
+        opacity: 0;
+        fill: inherit;
+        (* we need to set fill here to prevent a weird firefox bug ... *)
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      60% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>SVG Animation via CSS</h1>
+  <p>
+    We are splitting the caligraphic path of the stroke into various quads ...<br>
+    Here's a simple hand coded example made of three stroke parts
+  </p>
+  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1000 400">
+    <g transform="translate(100 100)">
+      <polygon id="step1" points="0,-50 0,50 100,50 100,-50" />
+      <polygon id="step2" points="100,-50 100,50 200,70 200,-70" />
+      <polygon id="step3" points="200,-70 200,70 300,40 300,-40" />
+    </g>
+</body>
+
+</html>
