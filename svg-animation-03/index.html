@@ -116,7 +116,8 @@
   <h3>Usage</h3>
   <ul>
     <li>Use the mouse to draw </li>
-    <li>Adjust pressure and twist using the sliders</li>
+    <li>Use the duration slider to adjust the length of the animation</li>
+    <li>Change pressure and twist using the other sliders</li>
     <li><em>Save SVG</em> to get the raw SVG (no animation)</li>
     <li><em>Export Data</em> to get the stroke data as JSON file </li>
   </ul>
@@ -127,11 +128,14 @@
     <li>The CSS is applied to each quad as soon as it is added to the SVG :-)</li>
   </ul>
 
+  <h3>Todo</h3>
+  <ul>
+    <li>Add timestamps to each data sample, so we can recreate the path</li>
+    <li>Import data (drag 'n drop)</li>
+  </ul>
 
   <h3>Possible Improvements</h3>
   <ul>
-    <li>Add timestamps to each sample, so we can recreate and export the path</li>
-    <li>Use timestamp to set the animation delay</li>
     <li>Create rounded path (bezier delimited quads instead of polygons)</li>
     <li>Use a SVG library such as Paper.js ...</li>
     <lI>Use a GUI library ...</li>
